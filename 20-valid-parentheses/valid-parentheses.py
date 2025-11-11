@@ -1,16 +1,17 @@
 class Solution:
     def isValid(self, s: str) -> bool:
-        matches = {"(":")", "[":"]", "{":"}"}
         stack = []
-
-        for i in s:
-            if i in matches:
-                stack.append(i)
+        matching = {"(": ")", "[": "]", "{": "}"}
+        
+        for c in s:
+            if c in matching:
+                stack.append(c)
             else:
                 if not stack:
                     return False
-                open_br = stack.pop()
-                if matches[open_br] != i:
+                
+                previous_opening = stack.pop()
+                if matching[previous_opening] != c:
                     return False
-
+ 
         return not stack
