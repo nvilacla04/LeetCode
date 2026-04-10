@@ -1,15 +1,15 @@
-# Definition for singly-linked list.
-# class ListNode:
-#     def __init__(self, val=0, next=None):
-#         self.val = val
-#         self.next = next
 class Solution:
-    def isPalindrome(self, head: Optional[ListNode]) -> bool:
-        curr = head
-        arr = []
-
-        while curr is not None:
-            arr.append(curr.val)
-            curr = curr.next
-
-        return arr == arr[::-1]
+    def isPalindrome(self, head):
+        slow = fast = head
+        stack = []
+        while fast and fast.next:
+            stack.append(slow.val)
+            slow = slow.next
+            fast = fast.next.next
+        if fast:
+            slow = slow.next
+        while slow:
+            if stack.pop() != slow.val:
+                return False
+            slow = slow.next
+        return True
