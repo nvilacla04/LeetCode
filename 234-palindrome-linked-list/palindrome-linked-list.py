@@ -12,12 +12,4 @@ class Solution:
             arr.append(curr.val)
             curr = curr.next
 
-        while head is not None:
-            c = arr.pop()
-
-            if head.val != c:
-                return False 
-
-            head = head.next
-
-        return True 
+        return arr == arr[::-1]
