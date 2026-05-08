@@ -1,63 +1,58 @@
+from collections import deque
+from typing import List
+
 class Solution:
+    N = 10**6 + 5
+    prime = [True] * N
+    prime[0] = prime[1] = False
+
+    for i in range(2, 1001):
+        if prime[i]:
+            for j in range(i * i, N, i):
+                prime[j] = False
+
     def minJumps(self, nums: List[int]) -> int:
         n = len(nums)
-        if n == 1:
-            return 0
+        limit = max(nums)
 
-        def is_prime(x):
-            if x < 2: return False
-            if x == 2: return True
-            if x % 2 == 0: return False
-            for i in range(3, int(x**0.5) + 1, 2):
-                if x % i == 0: return False
-            return True
+        head = [-1] * (limit + 1)
+        nxt = [-1] * n
+        for i in range(n):
+            val = nums[i]
+            nxt[i] = head[val]
+            head[val] = i
 
-        def prime_factors(x):
-            factors = set()
-            d = 2
-            while d * d <= x:
-                if x % d == 0:
-                    factors.add(d)
-                    while x % d == 0:
-                        x //= d
-                d += 1
-            if x > 1:
-                factors.add(x)
-            return factors
-
-        #primes that acutaly appear as vals in nums
-        primes_in_nums = {v for v in nums if is_prime(v)}
-
-        #for each prime p collect all idx j where num[j]%p is 0
-        prime_to_indices = defaultdict(list)
-        for i, v in enumerate(nums):
-            for p in prime_factors(v):
-                if p in primes_in_nums:
-                    prime_to_indices[p].append(i)
-
-        dist = [-1] * n
-        dist[0] = 0
+        dp = [-1] * n
+        dp[0] = 0
         queue = deque([0])
-        processed_primes = set()   #avoid expanding the same group
+        seen = set()
 
         while queue:
-            idx = queue.popleft()
-            if idx == n - 1:
-                return dist[idx]
+            dq = queue.popleft()
 
-            #adjacent steps
-            for nxt in (idx - 1, idx + 1):
-                if 0 <= nxt < n and dist[nxt] == -1:
-                    dist[nxt] = dist[idx] + 1
-                    queue.append(nxt)
+            if dq == n - 1:
+                return dp[dq]
 
-            #prime tp
-            p = nums[idx]
-            if is_prime(p) and p not in processed_primes:
-                processed_primes.add(p)
-                for j in prime_to_indices[p]:
-                    if dist[j] == -1:
-                        dist[j] = dist[idx] + 1
-                        queue.append(j)
+            right = dq + 1
+            if right < n and dp[right] == -1:
+                dp[right] = dp[dq] + 1
+                queue.append(right)
 
-        return dist[n - 1]
+            left = dq - 1
+            if left >= 0 and dp[left] == -1:
+                dp[left] = dp[dq] + 1
+                queue.append(left)
+
+            val = nums[dq]
+            if Solution.prime[val] and val not in seen:
+                seen.add(val)
+                for i in range(val, limit + 1, val):
+                    j = head[i]
+                    while j != -1:
+                        if dp[j] == -1:
+                            dp[j] = dp[dq] + 1
+                            queue.append(j)
+                        j = nxt[j]
+                    head[i] = -1
+
+        return -1
